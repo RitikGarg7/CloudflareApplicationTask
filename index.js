@@ -6,17 +6,14 @@ addEventListener('fetch', event => {
 
 
 async function handleRequest(request) {
-  let url;
   let cookieName=getCookie(request);
-
+  let url;
   if(cookieName!=null) {
     url=cookieName;
   }
   else {
      url=await fetchMainURL() 
-     var date = new Date();
-    date.setTime(date.getTime() + (5 * 60 * 60 * 1000));
-     var cookieString = `${COOKIE}=${url};Expires=${date.toGMTString()};Secure; HttpOnly`;
+     var cookieString = `${COOKIE}=${url};Secure; HttpOnly`;
   }
   
   let data = await fetchText(url)
@@ -32,7 +29,7 @@ async function handleRequest(request) {
   return innerHTMLChanged;
 }
 
-
+// returns null for intial request and then always returns the saved cookie (persisting variants)
  function getCookie(request) {
   let initialCookie=null;
   let allCookies=request.headers.get('Cookie');
@@ -50,7 +47,7 @@ async function handleRequest(request) {
   return initialCookie;
 }
 
-
+// request URL from the API randomly
 async function fetchMainURL() {
   var JSONURL ='https://cfw-takehome.developers.workers.dev/api/variants';
   let response = await fetch(JSONURL);
@@ -62,16 +59,14 @@ async function fetchMainURL() {
   return array[randomNumber];
 }
 
-
-
-
+// fetch request to one of the URL
 async function fetchText(url) {
   let result = await fetch(url)
   return result.text()
 }
  
 
-
+// element handler for Title tag
 class Title {
   element(element) {
     console.log(`Incoming element1: ${element.tagName}`)
@@ -79,12 +74,15 @@ class Title {
   }
 }
 
+// element handler for Title tag
 class Heading{
   element(element) {
     console.log(`Incoming element2: ${element.tagName}`)
     element.setInnerContent('Ritik Garg')
   }
 }
+
+// element handler for Paragraph tag
 class Paragraph{
   element(element) {
     console.log(`Incoming element3: ${element.tagName}`)
@@ -92,6 +90,7 @@ class Paragraph{
   }
 }
 
+// element handler for anchor tag
 class Link {
   element(element) {
     const attribute = element.getAttribute('href')
@@ -103,7 +102,7 @@ class Link {
   }
 }
 
-// Changing copy/URLs
+// Changing copy/URLs using HTMLrewriter
 async function renderHTML(data) {
   return new HTMLRewriter().on('title', new Title())
   .on('h1#title',new Heading())
